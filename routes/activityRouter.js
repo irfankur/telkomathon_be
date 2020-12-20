@@ -68,17 +68,10 @@ activityRouter.route('/:activityId')
             res.setHeader('Content-Type', 'application/json');
             return res.json({"exists": false, "activities": activities});
         }
-        else {
-            if (activities.indexOf(req.params.activityId) < 0) {
-                res.statusCode = 200;
+        else {            
+            res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
-            return res.json({"exists": false, "activities": activities});
-            }
-            else {
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                return res.json({"exists": true, "activities": activities});
-            }
+            return res.json({"exists": true, "activities": activities});
         }
         
     }, (err) => next(err))
