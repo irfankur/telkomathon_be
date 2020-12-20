@@ -12,15 +12,15 @@ activityRouter.use(bodyParser.json());
 
 activityRouter.route('/')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
-.get(cors.cors, (req,res,next) => {
-    Activity.find(req.query)
+.get(cors.cors, authenticate.verifyUser, (req,res,next) => {
+    Activity.findOne({user: req.user._id})
     .populate('user')
-    .then((activities) => {
+    .exec((err, activities) => {
+        if (err) return next(err);
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(activities);
-    }, (err) => next(err))
-    .catch((err) => next(err));
+    });
 })
 .post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     if (req.body != null) {
@@ -60,13 +60,27 @@ activityRouter.route('/')
 
 activityRouter.route('/:activityId')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
-.get(cors.cors, (req,res,next) => {
-    Activity.findById(req.params.activityId)
-    .populate('user')
-    .then((activity) => {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json(activity);
+.get(cors.cors, authenticate.verifyUser, (req,res,next) => {
+    Activity.findOne({user: req.user._id})
+    .then((activities) => {
+        if (!activities) {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            return res.json({"exists": false, "activities": activities});
+        }
+        else {
+            if (activities.indexOf(req.params.activityId) < 0) {
+                res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            return res.json({"exists": false, "activities": activities});
+            }
+            else {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                return res.json({"exists": true, "activities": activities});
+            }
+        }
+        
     }, (err) => next(err))
     .catch((err) => next(err));
 })
