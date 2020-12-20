@@ -82,7 +82,7 @@ router.post('/login', cors.corsWithOptions, (req,res, next) => {
   }) (req, res, next);
 });
 
-router.get('/logout', (req,res, next) => {
+router.get('/logout', cors.corsWithOptions, (req,res, next) => {
   if (req.session) {
     req.session.destroy();
     res.clearCookie('session-id');
@@ -93,15 +93,6 @@ router.get('/logout', (req,res, next) => {
     err.status = 403;
     return next(err);
   }
-});
-
-router.put('/checkin', cors.corsWithOptions, authenticate.verifyUser, (req,res, next) => {
-  Checkin.findByIdAndUpdate(req.user._id, {$set : {chekin: true}})
-  .then((checkin) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.json({success: true, status: 'Checkin Successful!', chekin: checkin});
-  })
 });
 
 router.get('/facebook/token', passport.authenticate('facebook-token'), (req, res) => {
